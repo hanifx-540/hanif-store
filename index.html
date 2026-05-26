@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanif Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, get, update }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkD1rKfDPKng-ssmYEfF4uJZDPI_4mYtk",
+    authDomain: "hanifx-206c8.firebaseapp.com",
+    databaseURL: "https://hanifx-206c8-default-rtdb.firebaseio.com",
+    projectId: "hanifx-206c8",
+    storageBucket: "hanifx-206c8.firebasestorage.app",
+    messagingSenderId: "1050477389957",
+    appId: "1:1050477389957:web:06a2aa3ed375219a12a1ec"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  window._fb = { db, ref, onValue, push, get, update };
+  document.dispatchEvent(new Event('fb-ready'));
+</script>
+<style>
+:root{
+  --bg:#07070f;--s1:#0f0f1c;--s2:#161626;
+  --a1:#f72585;--a2:#7209b7;--a3:#4cc9f0;--a4:#f8961e;
+  --txt:#f0f0ff;--muted:#6a6a8a;--border:rgba(247,37,133,.18);
+  --glow:rgba(247,37,133,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;background:rgba(7,7,15,.85);
+  backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:3px;
+  background:linear-gradient(120deg,var(--a1),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-r{display:flex;align-items:center;gap:14px}
+.nav-btn{display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:40px;
+  border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s}
+.cart-btn{background:var(--a1);color:#fff}
+.cart-btn:hover{background:#d4006e;transform:translateY(-2px);box-shadow:0 6px 22px var(--glow)}
+.track-btn{background:transparent;border:1px solid var(--border)!important;color:var(--txt)}
+.track-btn:hover{border-color:var(--a1)!important;background:rgba(247,37,133,.08)}
+.c-num{background:var(--a4);color:#111;width:19px;height:19px;border-radius:50%;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:80px 20px 40px;position:relative;overflow:hidden}
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.hero-content{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(247,37,133,.12);border:1px solid rgba(247,37,133,.3);
+  border-radius:40px;padding:6px 18px;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--a1);margin-bottom:26px;
+  animation:fadeUp .6s both}
+.dot{width:6px;height:6px;background:var(--a1);border-radius:50%;animation:blink 1.8s infinite}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(48px,9vw,110px);
+  font-weight:800;line-height:.9;letter-spacing:-2px;
+  animation:fadeUp .6s .08s both}
+.hero h1 span{background:linear-gradient(120deg,var(--a1),var(--a3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:15px;color:var(--muted);max-width:420px;margin:20px auto 36px;
+  line-height:1.75;animation:fadeUp .6s .16s both}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .24s both}
+.btn-p{background:linear-gradient(135deg,var(--a1),var(--a2));border:none;color:#fff;
+  padding:13px 32px;border-radius:50px;font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;
+  box-shadow:0 4px 24px var(--glow)}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 36px var(--glow)}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--txt);
+  padding:13px 32px;border-radius:50px;font-size:14px;cursor:pointer;transition:all .3s}
+.btn-o:hover{border-color:var(--a1);transform:translateY(-3px)}
+
+/* FLOATING SHAPES */
+.shapes{position:absolute;inset:0;pointer-events:none;z-index:0}
+.sh{position:absolute;border-radius:18px;border:1px solid rgba(247,37,133,.2);
+  background:rgba(247,37,133,.04);animation:floatS 9s ease-in-out infinite}
+.sh:nth-child(1){width:100px;height:140px;top:15%;left:5%;animation-delay:0s}
+.sh:nth-child(2){width:70px;height:100px;top:65%;left:4%;animation-delay:-3s}
+.sh:nth-child(3){width:90px;height:125px;top:18%;right:5%;animation-delay:-1.5s}
+.sh:nth-child(4){width:65px;height:90px;top:68%;right:4%;animation-delay:-4.5s}
+
+/* SECTION */
+section{position:relative;z-index:1}
+.sec-hd{text-align:center;padding:70px 20px 40px}
+.sec-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--a3);margin-bottom:8px}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,50px);font-weight:800;letter-spacing:-1px}
+.sec-line{width:52px;height:3px;background:linear-gradient(90deg,var(--a1),var(--a3));border-radius:10px;margin:12px auto 0}
+
+/* SEARCH + CAT */
+.search-row{display:flex;justify-content:center;padding:0 20px 28px;position:relative;z-index:1}
+.s-wrap{position:relative;width:100%;max-width:460px}
+.s-wrap input{width:100%;padding:12px 18px 12px 44px;background:var(--s1);
+  border:1px solid var(--border);border-radius:50px;color:var(--txt);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all .3s}
+.s-wrap input:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(247,37,133,.13)}
+.s-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
+.cats{display:flex;gap:9px;justify-content:center;padding:0 20px 32px;flex-wrap:wrap;position:relative;z-index:1}
+.cat-b{padding:7px 16px;border-radius:40px;background:var(--s1);border:1px solid var(--border);
+  color:var(--muted);font-size:12px;font-weight:500;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;transition:all .25s}
+.cat-b:hover{border-color:var(--a1);color:var(--txt)}
+.cat-b.on{background:var(--a1);border-color:var(--a1);color:#fff}
+
+/* GRID */
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;padding:0 32px 80px;max-width:1360px;margin:0 auto;position:relative;z-index:1}
+.p-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;transition:all .35s cubic-bezier(.175,.885,.32,1.275);cursor:pointer}
+.p-card:hover{transform:translateY(-7px);border-color:var(--a1);
+  box-shadow:0 18px 50px rgba(247,37,133,.2)}
+.p-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:76px;background:linear-gradient(135deg,var(--s2),var(--bg));position:relative;overflow:hidden}
+.p-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,var(--s1))}
+.p-badge{position:absolute;top:10px;left:10px;z-index:2;background:var(--a1);color:#fff;
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase}
+.p-body{padding:16px}
+.p-cat{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a3);margin-bottom:4px}
+.p-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:5px;line-height:1.2}
+.p-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:13px}
+.p-foot{display:flex;align-items:center;justify-content:space-between}
+.p-price{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--a1)}
+.p-price s{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
+.atc{width:38px;height:38px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;
+  font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .25s;flex-shrink:0}
+.atc:hover{transform:scale(1.12);box-shadow:0 5px 18px var(--glow)}
+.atc.ok{background:linear-gradient(135deg,#06d6a0,#048a68)}
+
+/* LOADING */
+.loading{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted)}
+.ld{display:inline-flex;gap:8px}
+.ld span{width:9px;height:9px;background:var(--a1);border-radius:50%;animation:bounce .8s ease-in-out infinite}
+.ld span:nth-child(2){animation-delay:.15s}
+.ld span:nth-child(3){animation-delay:.3s}
+.empty{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted)}
+
+/* BKASH SECTION */
+.bkash-sec{max-width:600px;margin:0 auto 80px;padding:0 20px;position:relative;z-index:1}
+.bkash-card{background:var(--s1);border:1px solid rgba(231,0,116,.3);border-radius:24px;padding:32px;text-align:center}
+.bk-logo{font-size:48px;margin-bottom:14px}
+.bk-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#e70074;margin-bottom:8px}
+.bk-num{font-size:26px;font-weight:700;letter-spacing:3px;color:var(--txt);margin:12px 0}
+.bk-note{font-size:13px;color:var(--muted);line-height:1.65}
+.bk-steps{display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left}
+.bk-step{display:flex;align-items:center;gap:12px;background:var(--s2);border-radius:12px;padding:12px 16px;font-size:13px}
+.bk-step span:first-child{width:26px;height:26px;background:var(--a1);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+
+/* CART SIDEBAR */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.on{opacity:1;pointer-events:all}
+.cart-side{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:95vw;
+  background:var(--s1);border-left:1px solid var(--border);z-index:201;
+  padding:24px;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow-y:auto}
+.cart-side.on{transform:translateX(0)}
+.cart-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.cart-ttl{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.x-btn{background:transparent;border:1px solid var(--border);color:var(--txt);
+  width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;transition:all .25s}
+.x-btn:hover{border-color:var(--a1);color:var(--a1)}
+.c-items{flex:1;display:flex;flex-direction:column;gap:10px}
+.c-item{display:flex;gap:12px;background:var(--s2);border-radius:12px;padding:12px;border:1px solid var(--border)}
+.c-ico{font-size:32px;flex-shrink:0}
+.c-info{flex:1}
+.c-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px}
+.c-pr{color:var(--a1);font-weight:700;margin-top:2px;font-size:13px}
+.c-qty{display:flex;align-items:center;gap:8px;margin-top:8px}
+.q-btn{width:24px;height:24px;border-radius:7px;background:var(--s1);border:1px solid var(--border);
+  color:var(--txt);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.q-btn:hover{border-color:var(--a1)}
+.rm-btn{margin-left:auto;background:transparent;border:none;color:var(--a1);cursor:pointer;font-size:12px}
+.c-foot{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}
+.c-tot{display:flex;justify-content:space-between;margin-bottom:14px}
+.c-tot-l{color:var(--muted);font-size:13px}
+.c-tot-v{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--a1)}
+.btn-co{width:100%;background:linear-gradient(135deg,var(--a1),var(--a2));border:none;
+  color:#fff;padding:14px;border-radius:12px;font-family:'Syne',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px}
+.btn-co:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--glow)}
+
+/* ORDER MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.on{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:24px;
+  padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:22px}
+.m-close{position:absolute;top:16px;right:16px;background:transparent;border:1px solid var(--border);
+  color:var(--txt);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center}
+.m-close:hover{border-color:var(--a1);color:var(--a1)}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.fg label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.fg input,.fg textarea,.fg select{background:var(--s2);border:1px solid var(--border);
+  border-radius:11px;color:var(--txt);padding:11px 14px;font-family:'DM Sans',sans-serif;
+  font-size:14px;outline:none;transition:all .3s;width:100%}
+.fg input:focus,.fg textarea:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(247,37,133,.12)}
+.fg textarea{resize:vertical;min-height:80px}
+.order-summary{background:var(--s2);border-radius:12px;padding:14px;margin-bottom:16px}
+.os-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.os-item{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.os-total{display:flex;justify-content:space-between;font-family:'Syne',sans-serif;
+  font-weight:800;color:var(--a1);font-size:16px;border-top:1px solid var(--border);
+  padding-top:10px;margin-top:8px}
+.pay-opts{display:flex;gap:10px;margin-bottom:16px}
+.pay-opt{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);
+  cursor:pointer;transition:all .25s;text-align:center;font-size:12px;font-weight:600;background:var(--s2)}
+.pay-opt:hover{border-color:var(--a1)}
+.pay-opt.on{border-color:var(--a1);background:rgba(247,37,133,.1)}
+.pay-opt .p-ico{font-size:24px;margin-bottom:4px}
+
+/* TRACK MODAL */
+.track-result{background:var(--s2);border-radius:14px;padding:18px;margin-top:16px;display:none}
+.tr-status{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;
+  border-radius:40px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.st-pending{background:rgba(248,150,30,.15);color:var(--a4)}
+.st-confirmed{background:rgba(76,201,240,.15);color:var(--a3)}
+.st-delivered{background:rgba(6,214,160,.15);color:#06d6a0}
+.st-cancelled{background:rgba(247,37,133,.15);color:var(--a1)}
+.tr-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;
+  border-bottom:1px solid var(--border)}
+.tr-row:last-child{border:none}
+.tr-label{color:var(--muted)}
+
+/* SUCCESS */
+.success-box{text-align:center;padding:20px 0}
+.success-ico{font-size:60px;margin-bottom:14px;animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}
+.success-id{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;
+  color:var(--a1);letter-spacing:2px;margin:10px 0}
+.success-note{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* WHATSAPP */
+.wa-fab{position:fixed;bottom:28px;right:28px;z-index:150;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#25d366,#128c7e);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,.4);
+  transition:all .3s;cursor:pointer;border:none;text-decoration:none}
+.wa-fab:hover{transform:translateY(-4px) scale(1.08);box-shadow:0 10px 32px rgba(37,211,102,.5)}
+.wa-fab svg{width:28px;height:28px;fill:#fff}
+.wa-tip{position:absolute;right:66px;background:#25d366;color:#fff;
+  padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s}
+.wa-fab:hover .wa-tip{opacity:1}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(14px);
+  background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;
+  padding:11px 24px;border-radius:40px;font-size:13px;font-weight:500;
+  z-index:400;opacity:0;transition:all .35s cubic-bezier(.175,.885,.32,1.275);
+  pointer-events:none;white-space:nowrap;box-shadow:0 6px 24px var(--glow)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:32px 20px;text-align:center;
+  color:var(--muted);font-size:12px;position:relative;z-index:1}
+.f-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:3px;
+  background:linear-gradient(120deg,var(--a1),var(--a3));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;margin-bottom:6px}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(32px);transition:all .6s cubic-bezier(.4,0,.2,1)}
+.rev.in{opacity:1;transform:translateY(0)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatS{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-20px) rotate(5deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+
+@media(max-width:600px){
+  nav{padding:12px 16px}
+  #grid{grid-template-columns:1fr 1fr;padding:0 12px 60px;gap:12px}
+  .sec-hd{padding:56px 16px 32px}
+  .hero h1{letter-spacing:-1px}
+  .wa-tip{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- WHATSAPP FAB -->
+<a class="wa-fab" href="https://wa.me/8801837256614" target="_blank" title="WhatsApp">
+  <span class="wa-tip">সাহায্য দরকার?</span>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<!-- OVERLAY -->
+<div class="overlay" id="ov" onclick="closeCart()"></div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-side" id="cartSide">
+  <div class="cart-hd">
+    <div class="cart-ttl">🛒 আপনার কার্ট</div>
+    <button class="x-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="c-items" id="cItems"></div>
+  <div class="c-foot" id="cFoot" style="display:none">
+    <div class="c-tot">
+      <span class="c-tot-l">মোট</span>
+      <span class="c-tot-v" id="cTotV">৳০</span>
+    </div>
+    <button class="btn-co" onclick="openOrderModal()">অর্ডার করুন →</button>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal-bg" id="orderModal">
+  <div class="modal">
+    <button class="m-close" onclick="closeOrderModal()">✕</button>
+    <h2>📦 অর্ডার করুন</h2>
+    <div class="order-summary">
+      <div class="os-title">অর্ডার সারাংশ</div>
+      <div id="oSummary"></div>
+      <div class="os-total"><span>মোট</span><span id="oTotal">৳০</span></div>
+    </div>
+    <div class="fg"><label>আপনার নাম</label><input id="oName" placeholder="পূর্ণ নাম লিখুন"></div>
+    <div class="fg"><label>ফোন নম্বর</label><input id="oPhone" placeholder="01XXXXXXXXX" type="tel"></div>
+    <div class="fg"><label>ঠিকানা</label><textarea id="oAddress" placeholder="বিস্তারিত ঠিকানা লিখুন..."></textarea></div>
+    <div class="fg"><label>পেমেন্ট পদ্ধতি</label></div>
+    <div class="pay-opts">
+      <div class="pay-opt on" id="payCOD" onclick="selectPay('cod')">
+        <div class="p-ico">💵</div>
+        <div>Cash on Delivery</div>
+      </div>
+      <div class="pay-opt" id="payBK" onclick="selectPay('bkash')">
+        <div class="p-ico">📱</div>
+        <div>bKash</div>
+      </div>
+    </div>
+    <div id="bkashInfo" style="display:none;background:rgba(231,0,116,.08);border:1px solid rgba(231,0,116,.25);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.7">
+      📱 bKash নম্বর: <strong style="color:#e70074;font-size:16px;letter-spacing:2px">01832744941</strong><br>
+      Send Money করে Transaction ID লিখুন নিচে।
+      <div class="fg" style="margin-top:10px;margin-bottom:0"><label>Transaction ID</label><input id="oTxn" placeholder="bKash Transaction ID"></div>
+    </div>
+    <div class="fg"><label>বিশেষ নির্দেশনা (ঐচ্ছিক)</label><textarea id="oNote" placeholder="কোনো বিশেষ নির্দেশনা থাকলে লিখুন..."></textarea></div>
+    <button class="btn-p" style="width:100%;padding:14px" onclick="placeOrder()">✓ অর্ডার নিশ্চিত করুন</button>
+  </div>
+</div>
+
+<!-- TRACK MODAL -->
+<div class="modal-bg" id="trackModal">
+  <div class="modal">
+    <button class="m-close" onclick="closeTrack()">✕</button>
+    <h2>🔍 অর্ডার ট্র্যাক করুন</h2>
+    <div class="fg"><label>অর্ডার ID</label><input id="trackId" placeholder="যেমন: ORD-123456"></div>
+    <button class="btn-p" style="width:100%;padding:13px" onclick="trackOrder()">ট্র্যাক করুন</button>
+    <div class="track-result" id="trackResult"></div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-bg" id="successModal">
+  <div class="modal" style="text-align:center">
+    <div class="success-box">
+      <div class="success-ico">🎉</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:8px">অর্ডার সফল!</div>
+      <div class="success-id" id="successId"></div>
+      <div class="success-note">
+        এই Order ID টি সেভ করুন।<br>
+        অর্ডার ট্র্যাক করতে এই ID ব্যবহার করুন।<br><br>
+        <strong>Cash on Delivery</strong> — পণ্য পেলে পরিশোধ করুন।<br>
+        যেকোনো প্রশ্নে WhatsApp করুন।
+      </div>
+      <button class="btn-p" style="margin-top:20px" onclick="document.getElementById('successModal').classList.remove('on')">ঠিক আছে</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">HANIF STORE</div>
+  <div class="nav-r">
+    <button class="nav-btn track-btn" onclick="openTrack()">🔍 ট্র্যাক</button>
+    <button class="nav-btn cart-btn" onclick="openCart()">
+      🛒 <span class="c-num" id="cNum">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="shapes"><div class="sh"></div><div class="sh"></div><div class="sh"></div><div class="sh"></div></div>
+  <div class="hero-content">
+    <div class="hero-tag"><span class="dot"></span>সেরা পণ্য · সেরা দাম</div>
+    <h1>HANIF<br><span>STORE</span></h1>
+    <p>সেরা মানের পণ্য, সেরা দামে। Cash on Delivery সুবিধায় ঘরে বসে অর্ডার করুন।</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">এখনই কিনুন →</button>
+      <button class="btn-o" onclick="openTrack()">অর্ডার ট্র্যাক করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOP -->
+<section id="shop">
+  <div class="sec-hd rev">
+    <div class="sec-tag">✦ সকল পণ্য</div>
+    <h2 class="sec-title">আমাদের পণ্যসমূহ</h2>
+    <div class="sec-line"></div>
+  </div>
+  <div class="search-row rev">
+    <div class="s-wrap">
+      <span class="s-ico">🔍</span>
+      <input type="text" placeholder="পণ্য খুঁজুন…" id="sInput" oninput="filterP()">
+    </div>
+  </div>
+  <div class="cats rev" id="cats"><button class="cat-b on" onclick="setCat('all')">সব</button></div>
+  <div id="grid"><div class="loading"><div class="ld"><span></span><span></span><span></span></div><p style="margin-top:12px;font-size:13px">লোড হচ্ছে…</p></div></div>
+</section>
+
+<!-- BKASH -->
+<section class="rev">
+  <div class="sec-hd">
+    <div class="sec-tag">💳 পেমেন্ট</div>
+    <h2 class="sec-title">bKash পেমেন্ট</h2>
+    <div class="sec-line"></div>
+  </div>
+  <div class="bkash-sec">
+    <div class="bkash-card">
+      <div class="bk-logo">📱</div>
+      <div class="bk-title">bKash Send Money</div>
+      <div class="bk-num">01832-744941</div>
+      <div class="bk-note">অর্ডার করার সময় bKash নির্বাচন করলে এই নম্বরে Send Money করুন।</div>
+      <div class="bk-steps">
+        <div class="bk-step"><span>১</span><span>bKash অ্যাপ খুলুন → Send Money</span></div>
+        <div class="bk-step"><span>২</span><span>নম্বর দিন: <strong>01832744941</strong></span></div>
+        <div class="bk-step"><span>৩</span><span>পরিমাণ দিন ও পাঠান</span></div>
+        <div class="bk-step"><span>৪</span><span>Transaction ID অর্ডার ফর্মে দিন</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">HANIF STORE</div>
+  <p>© ২০২৫ Hanif Store · সকল পণ্যের মান নিশ্চিত · যেকোনো সমস্যায় WhatsApp করুন</p>
+</footer>
+
+<script>
+/* STATE */
+let allP={}, cart=JSON.parse(localStorage.getItem('hs_cart')||'[]');
+let activeCat='all', searchQ='', payMethod='cod';
+
+/* CANVAS BG */
+(function(){
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  let pts=[];
+  function init(){
+    cv.width=innerWidth;cv.height=innerHeight;pts=[];
+    for(let i=0;i<80;i++)pts.push({
+      x:Math.random()*cv.width,y:Math.random()*cv.height,
+      vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+      r:Math.random()*1.5+.3,o:Math.random()*.4+.1,
+      c:['#f72585','#7209b7','#4cc9f0'][Math.floor(Math.random()*3)]
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='rgba(247,37,133,.03)';ctx.lineWidth=1;
+    for(let x=0;x<cv.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}
+    for(let y=0;y<cv.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
+    pts.forEach(p=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.c;ctx.globalAlpha=p.o;ctx.fill();ctx.globalAlpha=1;
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+    });
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+      if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(247,37,133,${.08*(1-d/110)})`;ctx.lineWidth=.4;ctx.stroke()}
+    }
+    requestAnimationFrame(draw);
+  }
+  init();draw();
+  window.addEventListener('resize',init);
+})();
+
+/* REVEAL */
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+
+/* TOAST */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+
+/* FIREBASE */
+document.addEventListener('fb-ready',()=>{
+  const{db,ref,onValue}=window._fb;
+  onValue(ref(db,'products'),snap=>{
+    allP={};
+    if(snap.exists())snap.forEach(c=>{allP[c.key]={...c.val(),_id:c.key}});
+    renderP();buildCats();
+  });
+});
+setTimeout(()=>{
+  if(!Object.keys(allP).length)
+    document.getElementById('grid').innerHTML=`<div class="empty"><p style="font-size:32px">🔮</p><p>এখনো কোনো পণ্য নেই।</p></div>`;
+},5000);
+
+/* PRODUCTS */
+function getFiltered(){
+  return Object.values(allP).filter(p=>{
+    const mc=activeCat==='all'||p.category===activeCat;
+    const ms=!searchQ||p.name.toLowerCase().includes(searchQ)||p.category.toLowerCase().includes(searchQ);
+    return mc&&ms;
+  });
+}
+function renderP(){
+  const grid=document.getElementById('grid'),list=getFiltered();
+  if(!list.length){
+    grid.innerHTML=`<div class="empty"><p style="font-size:32px">🔍</p><p>${Object.keys(allP).length?'কোনো পণ্য পাওয়া যায়নি।':'এখনো কোনো পণ্য নেই।'}</p></div>`;
+    return;
+  }
+  grid.innerHTML=list.map((p,i)=>`
+    <div class="p-card" style="animation:fadeUp .4s ${i*.05}s both">
+      <div class="p-img">
+        ${p.badge?`<div class="p-badge">${p.badge}</div>`:''}
+        <span style="position:relative;z-index:1">${p.emoji||'📦'}</span>
+      </div>
+      <div class="p-body">
+        <div class="p-cat">${p.category||''}</div>
+        <div class="p-name">${p.name}</div>
+        <div class="p-desc">${p.desc||''}</div>
+        <div class="p-foot">
+          <div class="p-price">৳${Number(p.price).toLocaleString()}${p.origPrice?`<s>৳${Number(p.origPrice).toLocaleString()}</s>`:''}</div>
+          <button class="atc" id="atc-${p._id}" onclick="addCart('${p._id}')">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function buildCats(){
+  const all=['all',...new Set(Object.values(allP).map(p=>p.category).filter(Boolean))];
+  document.getElementById('cats').innerHTML=all.map(c=>`
+    <button class="cat-b${activeCat===c?' on':''}" onclick="setCat('${c}')">${c==='all'?'সব':c}</button>
+  `).join('');
+}
+function setCat(c){activeCat=c;buildCats();renderP()}
+function filterP(){searchQ=document.getElementById('sInput').value.toLowerCase();renderP()}
+
+/* CART */
+function saveCart(){localStorage.setItem('hs_cart',JSON.stringify(cart))}
+function addCart(id){
+  const p=allP[id];if(!p)return;
+  const ex=cart.find(x=>x._id===id);
+  if(ex)ex.qty++;else cart.push({...p,qty:1});
+  saveCart();updateCartUI();
+  const btn=document.getElementById('atc-'+id);
+  if(btn){btn.textContent='✓';btn.classList.add('ok');setTimeout(()=>{btn.textContent='+';btn.classList.remove('ok')},1300)}
+  toast(`✦ ${p.name} কার্টে যোগ হয়েছে!`);
+}
+function rmCart(id){cart=cart.filter(x=>x._id!==id);saveCart();updateCartUI();renderCart()}
+function chQty(id,d){
+  const i=cart.find(x=>x._id===id);if(!i)return;
+  i.qty+=d;if(i.qty<=0)rmCart(id);else{saveCart();updateCartUI();renderCart()}
+}
+function renderCart(){
+  const ci=document.getElementById('cItems'),cf=document.getElementById('cFoot');
+  if(!cart.length){
+    ci.innerHTML=`<div style="text-align:center;padding:50px 20px;color:var(--muted)"><p style="font-size:40px">🛒</p><p style="margin-top:10px">কার্ট খালি</p></div>`;
+    cf.style.display='none';return;
+  }
+  cf.style.display='block';
+  ci.innerHTML=cart.map(it=>`
+    <div class="c-item">
+      <div class="c-ico">${it.emoji||'📦'}</div>
+      <div class="c-info">
+        <div class="c-name">${it.name}</div>
+        <div class="c-pr">৳${(it.price*it.qty).toLocaleString()}</div>
+        <div class="c-qty">
+          <button class="q-btn" onclick="chQty('${it._id}',-1)">−</button>
+          <span style="font-weight:700;font-size:13px">${it.qty}</span>
+          <button class="q-btn" onclick="chQty('${it._id}',1)">+</button>
+          <button class="rm-btn" onclick="rmCart('${it._id}')">সরান</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cTotV').textContent='৳'+cart.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString();
+}
+function updateCartUI(){
+  const n=cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cNum').textContent=n;
+}
+function openCart(){document.getElementById('ov').classList.add('on');document.getElementById('cartSide').classList.add('on');renderCart()}
+function closeCart(){document.getElementById('ov').classList.remove('on');document.getElementById('cartSide').classList.remove('on')}
+
+/* ORDER */
+function selectPay(m){
+  payMethod=m;
+  document.getElementById('payCOD').classList.toggle('on',m==='cod');
+  document.getElementById('payBK').classList.toggle('on',m==='bkash');
+  document.getElementById('bkashInfo').style.display=m==='bkash'?'block':'none';
+}
+function openOrderModal(){
+  if(!cart.length){toast('কার্ট খালি!');return}
+  closeCart();
+  const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('oSummary').innerHTML=cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>৳${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+  document.getElementById('oTotal').textContent='৳'+total.toLocaleString();
+  document.getElementById('orderModal').classList.add('on');
+}
+function closeOrderModal(){document.getElementById('orderModal').classList.remove('on')}
+async function placeOrder(){
+  const name=document.getElementById('oName').value.trim();
+  const phone=document.getElementById('oPhone').value.trim();
+  const address=document.getElementById('oAddress').value.trim();
+  if(!name||!phone||!address){toast('⚠️ সব তথ্য পূরণ করুন!');return}
+  const txn=payMethod==='bkash'?document.getElementById('oTxn').value.trim():'';
+  if(payMethod==='bkash'&&!txn){toast('⚠️ bKash Transaction ID দিন!');return}
+  const{db,ref,push}=window._fb;
+  const orderId='ORD-'+Date.now().toString().slice(-6);
+  const order={
+    orderId,name,phone,address,
+    payMethod,txn:txn||'N/A',
+    note:document.getElementById('oNote').value.trim(),
+    items:cart.map(i=>({name:i.name,qty:i.qty,price:i.price,emoji:i.emoji||'📦'})),
+    total:cart.reduce((s,i)=>s+i.price*i.qty,0),
+    status:'pending',
+    date:new Date().toLocaleString('bn-BD')
+  };
+  try{
+    await push(ref(db,'orders'),order);
+    cart=[];saveCart();updateCartUI();
+    closeOrderModal();
+    document.getElementById('successId').textContent=orderId;
+    document.getElementById('successModal').classList.add('on');
+  }catch(e){toast('❌ সমস্যা হয়েছে, আবার চেষ্টা করুন।')}
+}
+
+/* TRACK */
+function openTrack(){document.getElementById('trackModal').classList.add('on');document.getElementById('trackResult').style.display='none';document.getElementById('trackId').value=''}
+function closeTrack(){document.getElementById('trackModal').classList.remove('on')}
+async function trackOrder(){
+  const id=document.getElementById('trackId').value.trim();
+  if(!id){toast('⚠️ Order ID দিন!');return}
+  const{db,ref,get}=window._fb;
+  const snap=await get(ref(db,'orders'));
+  let found=null;
+  if(snap.exists())snap.forEach(c=>{if(c.val().orderId===id)found=c.val()});
+  const res=document.getElementById('trackResult');
+  if(!found){res.style.display='block';res.innerHTML=`<p style="color:var(--a1);text-align:center">❌ এই ID-তে কোনো অর্ডার পাওয়া যায়নি।</p>`;return}
+  const stMap={pending:{cls:'st-pending',txt:'⏳ অপেক্ষমান'},confirmed:{cls:'st-confirmed',txt:'✅ নিশ্চিত'},delivered:{cls:'st-delivered',txt:'🎉 ডেলিভারি হয়েছে'},cancelled:{cls:'st-cancelled',txt:'❌ বাতিল'}};
+  const st=stMap[found.status]||stMap.pending;
+  res.style.display='block';
+  res.innerHTML=`
+    <div class="tr-status ${st.cls}">${st.txt}</div>
+    <div class="tr-row"><span class="tr-label">অর্ডার ID</span><span style="font-weight:700">${found.orderId}</span></div>
+    <div class="tr-row"><span class="tr-label">নাম</span><span>${found.name}</span></div>
+    <div class="tr-row"><span class="tr-label">ফোন</span><span>${found.phone}</span></div>
+    <div class="tr-row"><span class="tr-label">পেমেন্ট</span><span>${found.payMethod==='bkash'?'bKash':'Cash on Delivery'}</span></div>
+    <div class="tr-row"><span class="tr-label">মোট</span><span style="color:var(--a1);font-weight:700">৳${found.total.toLocaleString()}</span></div>
+    <div class="tr-row"><span class="tr-label">তারিখ</span><span>${found.date}</span></div>
+    <div class="tr-row"><span class="tr-label">পণ্য</span><span>${found.items.map(i=>`${i.emoji} ${i.name} ×${i.qty}`).join(', ')}</span></div>
+  `;
+}
+
+updateCartUI();
+</script>
+</body>
+</html>
