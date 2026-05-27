@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Hanif Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, remove, update }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey:"AIzaSyAkD1rKfDPKng-ssmYEfF4uJZDPI_4mYtk",
+    authDomain:"hanifx-206c8.firebaseapp.com",
+    databaseURL:"https://hanifx-206c8-default-rtdb.firebaseio.com",
+    projectId:"hanifx-206c8",
+    storageBucket:"hanifx-206c8.firebasestorage.app",
+    messagingSenderId:"1050477389957",
+    appId:"1:1050477389957:web:06a2aa3ed375219a12a1ec"
+  };
+  const app=initializeApp(firebaseConfig);
+  const db=getDatabase(app);
+  window._fb={db,ref,onValue,push,remove,update};
+  window._fbReady=true;
+  document.dispatchEvent(new Event('fb-ready'));
+</script>
+<style>
+:root{--bg:#07070f;--s1:#0f0f1c;--s2:#161626;--s3:#1e1e30;--a1:#f72585;--a2:#7209b7;--a3:#4cc9f0;--a4:#f8961e;--green:#06d6a0;--txt:#f0f0ff;--muted:#6a6a8a;--border:rgba(247,37,133,.18);--glow:rgba(247,37,133,.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh}
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+input,textarea,select{background:var(--s2);border:1px solid var(--border);border-radius:12px;color:var(--txt);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all .3s;width:100%}
+input:focus,textarea:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(247,37,133,.12)}
+textarea{resize:vertical;min-height:80px}
+label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+
+/* LOGIN */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:28px;padding:44px 38px;width:100%;max-width:390px;position:relative;z-index:1;animation:fadeUp .5s both}
+.login-ico{text-align:center;font-size:50px;margin-bottom:16px}
+.login-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:3px;background:linear-gradient(120deg,var(--a1),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px}
+.login-sub{text-align:center;color:var(--muted);font-size:12px;margin-bottom:28px}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--a1),var(--a2));border:none;color:#fff;padding:13px;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s;margin-top:4px}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--glow)}
+.login-err{color:var(--a1);font-size:13px;text-align:center;margin-top:10px;display:none}
+
+/* LAYOUT */
+#adminPage{display:none}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:235px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sb-logo{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.sb-logo-t{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;background:linear-gradient(120deg,var(--a1),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-logo-s{font-size:11px;color:var(--muted);margin-top:2px}
+.sb-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.sb-btn{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:11px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .22s;border:none;background:transparent;text-align:left;width:100%}
+.sb-btn:hover{background:var(--s2);color:var(--txt)}
+.sb-btn.on{background:rgba(247,37,133,.12);color:var(--a1);border:1px solid rgba(247,37,133,.18)}
+.sb-ico{font-size:16px;width:22px;text-align:center}
+.badge{margin-left:auto;background:var(--a1);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:18px;text-align:center}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.btn-logout{width:100%;display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:11px;border:1px solid rgba(247,37,133,.22);background:transparent;color:var(--a1);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .22s}
+.btn-logout:hover{background:var(--a1);color:#fff}
+.main{margin-left:235px;flex:1;padding:26px 28px;position:relative;z-index:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+.page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.page-date{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.st{background:var(--s1);border:1px solid var(--border);border-radius:17px;padding:18px;transition:all .25s}
+.st:hover{border-color:var(--a1);transform:translateY(-3px)}
+.st-n{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--a1),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.st-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:3px}
+
+/* PANELS */
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:19px;overflow:hidden;display:none}
+.panel.on{display:block}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+.ph-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800}
+.pb{padding:22px}
+
+/* FORM */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgrid .full{grid-column:1/-1}
+
+/* IMAGE UPLOAD */
+.img-upload-area{
+  border:2px dashed var(--border);border-radius:16px;padding:28px;
+  text-align:center;cursor:pointer;transition:all .3s;position:relative;
+  background:var(--s2);
+}
+.img-upload-area:hover{border-color:var(--a1);background:rgba(247,37,133,.05)}
+.img-upload-area.drag{border-color:var(--a1);background:rgba(247,37,133,.08)}
+.img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-ico{font-size:36px;margin-bottom:8px}
+.upload-txt{font-size:13px;color:var(--muted)}
+.upload-txt span{color:var(--a1);font-weight:600}
+.img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin-top:14px;display:none;border:1px solid var(--border)}
+.upload-progress{margin-top:12px;display:none}
+.prog-bar{width:100%;height:6px;background:var(--s3);border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--a1),var(--a2));border-radius:10px;width:0;transition:width .3s}
+.prog-txt{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.img-url-or{display:flex;align-items:center;gap:10px;margin:14px 0}
+.img-url-or::before,.img-url-or::after{content:'';flex:1;height:1px;background:var(--border)}
+.img-url-or span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* EMOJI */
+.ep{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.eo{width:38px;height:38px;border-radius:9px;font-size:19px;background:var(--s2);border:1.5px solid var(--border);cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center}
+.eo:hover{border-color:var(--a1);transform:scale(1.08)}
+.eo.on{border-color:var(--a1);background:rgba(247,37,133,.14)}
+
+.btn-save{background:linear-gradient(135deg,var(--a1),var(--a2));border:none;color:#fff;padding:12px 26px;border-radius:11px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;margin-top:18px}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--glow)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* PRODUCT ROWS */
+.p-row{display:flex;align-items:center;gap:13px;background:var(--s2);border:1px solid var(--border);border-radius:13px;padding:12px 15px;margin-bottom:9px;transition:all .22s}
+.p-row:hover{border-color:var(--a1)}
+.p-thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden}
+.p-thumb img{width:100%;height:100%;object-fit:cover}
+.p-inf{flex:1}
+.p-nm{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.p-mt{font-size:11px;color:var(--muted);margin-top:2px}
+.p-pr{font-family:'Syne',sans-serif;font-weight:800;color:var(--a1);font-size:15px}
+.btn-del{background:rgba(247,37,133,.1);border:1px solid rgba(247,37,133,.22);color:var(--a1);padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .22s}
+.btn-del:hover{background:var(--a1);color:#fff}
+
+/* ORDERS */
+.o-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;transition:all .22s}
+.o-card:hover{border-color:var(--a1)}
+.o-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.o-id{font-family:'Syne',sans-serif;font-weight:800;font-size:14px}
+.o-date{font-size:11px;color:var(--muted)}
+.o-total{font-family:'Syne',sans-serif;font-weight:800;color:var(--a1);font-size:15px}
+.st-badge{display:inline-flex;align-items:center;padding:4px 11px;border-radius:40px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+.st-pending{background:rgba(248,150,30,.15);color:var(--a4)}
+.st-confirmed{background:rgba(76,201,240,.15);color:var(--a3)}
+.st-delivered{background:rgba(6,214,160,.15);color:var(--green)}
+.st-cancelled{background:rgba(247,37,133,.15);color:var(--a1)}
+.o-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:7px;margin-bottom:10px}
+.o-field{font-size:12px}
+.o-field-l{color:var(--muted);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:2px}
+.o-items-txt{font-size:12px;color:var(--muted);margin-bottom:11px;line-height:1.6}
+.o-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.btn-st{padding:5px 11px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid var(--border);background:var(--s3);color:var(--txt)}
+.btn-st:hover{border-color:var(--a1);color:var(--a1)}
+.btn-st.act{background:var(--a1);border-color:var(--a1);color:#fff}
+.btn-del-o{margin-left:auto;background:rgba(247,37,133,.1);border:1px solid rgba(247,37,133,.18);color:var(--a1);padding:5px 11px;border-radius:8px;font-size:11px;cursor:pointer;transition:all .18s}
+.btn-del-o:hover{background:var(--a1);color:#fff}
+
+/* FILTER */
+.fbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.fb{padding:5px 13px;border-radius:40px;background:var(--s2);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .18s}
+.fb:hover{border-color:var(--a1);color:var(--txt)}
+.fb.on{background:var(--a1);border-color:var(--a1);color:#fff}
+
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty .ei{font-size:38px;margin-bottom:10px}
+
+/* CONFIRM */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(5px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.on{display:flex}
+.conf{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:350px;text-align:center}
+.conf-ico{font-size:42px;margin-bottom:11px}
+.conf-t{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:7px}
+.conf-m{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.conf-btns{display:flex;gap:9px;justify-content:center}
+.btn-cc{background:transparent;border:1px solid var(--border);color:var(--txt);padding:9px 20px;border-radius:10px;cursor:pointer;font-size:13px;transition:all .18s}
+.btn-cc:hover{border-color:var(--a1)}
+.btn-cok{background:var(--a1);border:none;color:#fff;padding:9px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;padding:10px 22px;border-radius:40px;font-size:13px;font-weight:500;z-index:500;opacity:0;transition:all .32s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;box-shadow:0 5px 20px var(--glow)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:860px){.sidebar{display:none}.main{margin-left:0;padding:16px}.stat-row{grid-template-columns:1fr 1fr}.fgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- CONFIRM -->
+<div class="modal-bg" id="confM">
+  <div class="conf">
+    <div class="conf-ico">⚠️</div>
+    <div class="conf-t" id="confT"></div>
+    <div class="conf-m" id="confMsg"></div>
+    <div class="conf-btns">
+      <button class="btn-cc" onclick="closeConf()">বাতিল</button>
+      <button class="btn-cok" id="confOk">নিশ্চিত</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-ico">🔐</div>
+    <div class="login-logo">HANIF STORE</div>
+    <div class="login-sub">Admin Panel · শুধুমাত্র অনুমোদিত ব্যক্তি</div>
+    <div class="fg"><label>Username</label><input id="lU" type="text" placeholder="username"></div>
+    <div class="fg"><label>Password</label><input id="lP" type="password" placeholder="••••••••"></div>
+    <button class="btn-login" onclick="doLogin()">প্রবেশ করুন →</button>
+    <div class="login-err" id="lErr">❌ ভুল username বা password!</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminPage">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sb-logo">
+        <div class="sb-logo-t">HANIF STORE</div>
+        <div class="sb-logo-s">Admin Panel</div>
+      </div>
+      <div class="sb-nav">
+        <button class="sb-btn on" onclick="showP('dash',this)"><span class="sb-ico">📊</span>Dashboard</button>
+        <button class="sb-btn" onclick="showP('add',this)"><span class="sb-ico">➕</span>পণ্য যোগ করুন</button>
+        <button class="sb-btn" onclick="showP('manage',this)"><span class="sb-ico">⚙️</span>পণ্য ব্যবস্থাপনা</button>
+        <button class="sb-btn" onclick="showP('orders',this)"><span class="sb-ico">🧾</span>অর্ডারসমূহ<span class="badge" id="pBadge">0</span></button>
+      </div>
+      <div class="sb-foot">
+        <button class="btn-logout" onclick="doLogout()">🚪 লগআউট</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div><div class="page-title" id="pgTitle">Dashboard</div><div class="page-date" id="pgDate"></div></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="panel on" id="panDash">
+        <div class="stat-row">
+          <div class="st"><div class="st-n" id="dP">0</div><div class="st-l">মোট পণ্য</div></div>
+          <div class="st"><div class="st-n" id="dO">0</div><div class="st-l">মোট অর্ডার</div></div>
+          <div class="st"><div class="st-n" id="dPend">0</div><div class="st-l">অপেক্ষমান</div></div>
+          <div class="st"><div class="st-n" id="dRev">৳০</div><div class="st-l">মোট আয়</div></div>
+        </div>
+        <div class="panel" style="display:block">
+          <div class="ph"><div class="ph-title">📋 সাম্প্রতিক অর্ডার</div></div>
+          <div class="pb" id="recentO"></div>
+        </div>
+      </div>
+
+      <!-- ADD PRODUCT -->
+      <div class="panel" id="panAdd">
+        <div class="ph"><div class="ph-title">➕ নতুন পণ্য যোগ করুন</div></div>
+        <div class="pb">
+          <div class="fgrid">
+            <div class="fg"><label>পণ্যের নাম</label><input id="pN" placeholder="যেমন: প্রিমিয়াম শার্ট"></div>
+            <div class="fg"><label>ক্যাটাগরি</label><input id="pC" placeholder="যেমন: পোশাক"></div>
+            <div class="fg"><label>মূল্য (৳)</label><input id="pPr" type="number" placeholder="৯৯৯"></div>
+            <div class="fg"><label>আসল মূল্য (৳) — ঐচ্ছিক</label><input id="pOp" type="number" placeholder="১৪৯৯"></div>
+            <div class="fg full"><label>বিবরণ</label><textarea id="pD" placeholder="পণ্যের সংক্ষিপ্ত বিবরণ…"></textarea></div>
+            <div class="fg full"><label>ব্যাজ — ঐচ্ছিক (HOT / NEW / SALE)</label><input id="pB" placeholder="NEW"></div>
+
+            <!-- IMAGE UPLOAD -->
+            <div class="fg full">
+              <label>পণ্যের ছবি</label>
+              <div class="img-upload-area" id="uploadArea">
+                <input type="file" id="imgFile" accept="image/*" onchange="handleImgSelect(this)">
+                <div class="upload-ico">📸</div>
+                <div class="upload-txt">ছবি drag করুন বা <span>ক্লিক করুন</span></div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG, WEBP · সর্বোচ্চ 5MB</div>
+              </div>
+              <img id="imgPreview" class="img-preview" alt="preview">
+              <div class="upload-progress" id="uploadProg">
+                <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+                <div class="prog-txt" id="progTxt">Upload হচ্ছে…</div>
+              </div>
+              <div class="img-url-or"><span>অথবা</span></div>
+              <input id="pImg" placeholder="সরাসরি Image URL দিন (https://...)" oninput="previewURL(this.value)">
+            </div>
+
+            <!-- EMOJI (fallback) -->
+            <div class="fg full">
+              <label>ইমোজি — ছবি না থাকলে দেখাবে</label>
+              <div class="ep" id="epick"></div>
+              <input id="pE" placeholder="অথবা যেকোনো ইমোজি টাইপ করুন" style="margin-top:9px">
+            </div>
+          </div>
+          <button class="btn-save" id="saveBtn" onclick="addProd()">✦ পণ্য যোগ করুন</button>
+        </div>
+      </div>
+
+      <!-- MANAGE -->
+      <div class="panel" id="panManage">
+        <div class="ph"><div class="ph-title">⚙️ পণ্য ব্যবস্থাপনা</div><div id="pCount" style="font-size:12px;color:var(--muted)"></div></div>
+        <div class="pb" id="prodList"></div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="panel" id="panOrders">
+        <div class="ph"><div class="ph-title">🧾 সকল অর্ডার</div></div>
+        <div class="pb">
+          <div class="fbar">
+            <button class="fb on" onclick="setF('all',this)">সব</button>
+            <button class="fb" onclick="setF('pending',this)">⏳ অপেক্ষমান</button>
+            <button class="fb" onclick="setF('confirmed',this)">✅ নিশ্চিত</button>
+            <button class="fb" onclick="setF('delivered',this)">🎉 ডেলিভারি</button>
+            <button class="fb" onclick="setF('cancelled',this)">❌ বাতিল</button>
+          </div>
+          <div id="orderList"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const CREDS={u:'hanifx',p:'habifx@#4253A'};
+const IMGBB_KEY='cbaa645ea8188cbe340cb0bbc13d270a';
+let allP={},allO={},selE='📦',uploadedImgURL='';
+const EMOJIS=['👟','👕','👗','💍','⌚','📱','💻','🎧','🎮','🎒','🌺','🍫','☕','📚','🏋️','🎯','🎸','🧴','💎','🛍️','🕶️','🏠','🚗','🎁','🖼️'];
+const stMap={pending:{c:'st-pending',t:'⏳ অপেক্ষমান'},confirmed:{c:'st-confirmed',t:'✅ নিশ্চিত'},delivered:{c:'st-delivered',t:'🎉 ডেলিভারি'},cancelled:{c:'st-cancelled',t:'❌ বাতিল'}};
+
+/* CANVAS */
+(function(){const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let pts=[];function init(){cv.width=innerWidth;cv.height=innerHeight;pts=[];for(let i=0;i<60;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.3,o:Math.random()*.3+.05,c:['#f72585','#7209b7','#4cc9f0'][Math.floor(Math.random()*3)]})}function draw(){ctx.clearRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(247,37,133,.025)';ctx.lineWidth=1;for(let x=0;x<cv.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}for(let y=0;y<cv.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c;ctx.globalAlpha=p.o;ctx.fill();ctx.globalAlpha=1;p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1});requestAnimationFrame(draw)}init();draw();window.addEventListener('resize',init)})();
+
+/* TOAST */
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500)}
+
+/* CONFIRM */
+function confirm2(t,m,cb){document.getElementById('confT').textContent=t;document.getElementById('confMsg').textContent=m;document.getElementById('confM').classList.add('on');document.getElementById('confOk').onclick=()=>{closeConf();cb()}}
+function closeConf(){document.getElementById('confM').classList.remove('on')}
+
+/* AUTH */
+function doLogin(){
+  const u=document.getElementById('lU').value.trim(),p=document.getElementById('lP').value;
+  if(u===CREDS.u&&p===CREDS.p){sessionStorage.setItem('hsa','1');document.getElementById('loginPage').style.display='none';document.getElementById('adminPage').style.display='block';initAdmin()}
+  else{document.getElementById('lErr').style.display='block';document.getElementById('lP').value='';setTimeout(()=>document.getElementById('lErr').style.display='none',3000)}
+}
+function doLogout(){sessionStorage.removeItem('hsa');location.reload()}
+document.getElementById('lP').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lU').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lP').focus()});
+if(sessionStorage.getItem('hsa')==='1'){document.getElementById('loginPage').style.display='none';document.getElementById('adminPage').style.display='block';if(window._fbReady)initAdmin();else document.addEventListener('fb-ready',initAdmin)}
+
+/* INIT */
+function initAdmin(){
+  document.getElementById('pgDate').textContent=new Date().toLocaleDateString('bn-BD',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  buildPicker();
+  const{db,ref,onValue}=window._fb;
+  onValue(ref(db,'products'),snap=>{allP={};if(snap.exists())snap.forEach(c=>{allP[c.key]={...c.val(),_id:c.key}});updateStats();if(document.getElementById('panManage').classList.contains('on'))renderManage()});
+  onValue(ref(db,'orders'),snap=>{allO={};if(snap.exists())snap.forEach(c=>{allO[c.key]={...c.val(),_id:c.key}});updateStats();if(document.getElementById('panOrders').classList.contains('on'))renderOrders();if(document.getElementById('panDash').classList.contains('on'))renderDash()});
+}
+
+/* IMAGE UPLOAD */
+function handleImgSelect(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>5*1024*1024){toast('⚠️ ছবি ৫MB এর বেশি হবে না!');return}
+  // show preview
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById('imgPreview');
+    prev.src=e.target.result;prev.style.display='block';
+  };
+  reader.readAsDataURL(file);
+  // upload to imgbb
+  uploadToImgBB(file);
+}
+
+async function uploadToImgBB(file){
+  const prog=document.getElementById('uploadProg');
+  const fill=document.getElementById('progFill');
+  const txt=document.getElementById('progTxt');
+  prog.style.display='block';
+  fill.style.width='30%';txt.textContent='ছবি upload হচ্ছে…';
+  const formData=new FormData();
+  formData.append('image',file);
+  try{
+    fill.style.width='60%';
+    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:formData});
+    const data=await res.json();
+    if(data.success){
+      uploadedImgURL=data.data.url;
+      document.getElementById('pImg').value=uploadedImgURL;
+      fill.style.width='100%';
+      txt.textContent='✅ Upload সফল!';
+      setTimeout(()=>{prog.style.display='none';fill.style.width='0'},2000);
+      toast('✅ ছবি upload সফল!');
+    }else{
+      txt.textContent='❌ Upload ব্যর্থ!';
+      toast('❌ Upload ব্যর্থ হয়েছে!');
+    }
+  }catch(e){
+    txt.textContent='❌ সমস্যা হয়েছে!';
+    toast('❌ Internet সমস্যা!');
+  }
+}
+
+function previewURL(url){
+  if(!url)return;
+  const prev=document.getElementById('imgPreview');
+  prev.src=url;prev.style.display='block';
+  prev.onerror=()=>{prev.style.display='none'};
+  uploadedImgURL=url;
+}
+
+/* PANELS */
+function showP(name,btn){
+  ['Dash','Add','Manage','Orders'].forEach(n=>document.getElementById('pan'+n).classList.remove('on'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('on'));
+  const map={dash:'Dash',add:'Add',manage:'Manage',orders:'Orders'};
+  document.getElementById('pan'+map[name]).classList.add('on');
+  btn.classList.add('on');
+  const titles={dash:'Dashboard',add:'নতুন পণ্য যোগ করুন',manage:'পণ্য ব্যবস্থাপনা',orders:'সকল অর্ডার'};
+  document.getElementById('pgTitle').textContent=titles[name];
+  if(name==='manage')renderManage();
+  if(name==='orders')renderOrders();
+  if(name==='dash')renderDash();
+}
+
+/* STATS */
+function updateStats(){
+  const op=Object.keys(allP).length,ov=Object.values(allO),pend=ov.filter(o=>o.status==='pending').length,rev=ov.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
+  document.getElementById('dP').textContent=op;document.getElementById('dO').textContent=ov.length;document.getElementById('dPend').textContent=pend;document.getElementById('dRev').textContent='৳'+(rev>=1000?Math.round(rev/1000)+'K':rev.toLocaleString());
+  document.getElementById('pBadge').textContent=pend;
+}
+
+/* DASHBOARD */
+function renderDash(){
+  const orders=Object.values(allO).sort((a,b)=>b._id.localeCompare(a._id)).slice(0,5);
+  document.getElementById('recentO').innerHTML=orders.length?orders.map(o=>oCardHTML(o,true)).join(''):'<div class="empty"><div class="ei">📋</div><p>এখনো কোনো অর্ডার নেই।</p></div>';
+}
+
+/* EMOJI */
+function buildPicker(){
+  const ep=document.getElementById('epick');ep.innerHTML='';
+  EMOJIS.forEach(e=>{const b=document.createElement('button');b.className='eo'+(e===selE?' on':'');b.textContent=e;b.onclick=()=>{selE=e;document.getElementById('pE').value=e;document.querySelectorAll('.eo').forEach(x=>x.classList.remove('on'));b.classList.add('on')};ep.appendChild(b)});
+}
+
+/* ADD PRODUCT */
+async function addProd(){
+  const name=document.getElementById('pN').value.trim(),price=parseFloat(document.getElementById('pPr').value);
+  if(!name||!price){toast('⚠️ নাম ও মূল্য আবশ্যক!');return}
+  const imgURL=document.getElementById('pImg').value.trim()||uploadedImgURL||'';
+  const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='সংরক্ষণ হচ্ছে…';
+  const{db,ref,push}=window._fb;
+  try{
+    await push(ref(db,'products'),{
+      name,price,
+      emoji:document.getElementById('pE').value||selE,
+      category:document.getElementById('pC').value.trim()||'সাধারণ',
+      desc:document.getElementById('pD').value.trim()||'',
+      origPrice:parseFloat(document.getElementById('pOp').value)||null,
+      badge:document.getElementById('pB').value.trim()||null,
+      image:imgURL,
+      createdAt:new Date().toLocaleDateString('bn-BD')
+    });
+    toast('✦ পণ্য সফলভাবে যোগ হয়েছে!');
+    ['pN','pPr','pC','pD','pOp','pB','pE','pImg'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('imgPreview').style.display='none';
+    uploadedImgURL='';
+  }catch(e){toast('❌ সমস্যা হয়েছে!')}
+  btn.disabled=false;btn.textContent='✦ পণ্য যোগ করুন';
+}
+
+/* MANAGE */
+function renderManage(){
+  const list=Object.values(allP);
+  document.getElementById('pCount').textContent='মোট '+list.length+'টি পণ্য';
+  document.getElementById('prodList').innerHTML=list.length?list.map(p=>`
+    <div class="p-row">
+      <div class="p-thumb">${p.image?`<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='${p.emoji||'📦'}'">`:p.emoji||'📦'}</div>
+      <div class="p-inf"><div class="p-nm">${p.name}</div><div class="p-mt">${p.category} · ${p.createdAt||'—'}${p.badge?' · <span style="color:var(--a1)">'+p.badge+'</span>':''}</div></div>
+      <div class="p-pr">৳${Number(p.price).toLocaleString()}</div>
+      <button class="btn-del" onclick="delProd('${p._id}','${p.name.replace(/'/g,"\\'")}')">মুছুন</button>
+    </div>`).join(''):'<div class="empty"><div class="ei">📦</div><p>কোনো পণ্য নেই।</p></div>';
+}
+
+async function delProd(id,name){confirm2('পণ্য মুছুন','"'+name+'" পণ্যটি মুছে যাবে। নিশ্চিত?',async()=>{const{db,ref,remove}=window._fb;try{await remove(ref(db,'products/'+id));toast('🗑️ মুছে ফেলা হয়েছে।')}catch(e){toast('❌ সমস্যা!')}})}
+
+/* ORDERS */
+function setF(f,btn){document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderOrders(f)}
+function renderOrders(f='all'){
+  let ov=Object.values(allO).sort((a,b)=>b._id.localeCompare(a._id));
+  if(f!=='all')ov=ov.filter(o=>o.status===f);
+  document.getElementById('orderList').innerHTML=ov.length?ov.map(o=>oCardHTML(o,false)).join(''):'<div class="empty"><div class="ei">📋</div><p>কোনো অর্ডার নেই।</p></div>';
+}
+function oCardHTML(o,mini){
+  const st=stMap[o.status||'pending'];
+  return`<div class="o-card">
+    <div class="o-top"><div><div class="o-id">${o.orderId||'—'}</div><div class="o-date">${o.date||'—'}</div></div><span class="st-badge ${st.c}">${st.t}</span><div class="o-total">৳${(o.total||0).toLocaleString()}</div></div>
+    ${!mini?`
+    <div class="o-grid">
+      <div class="o-field"><span class="o-field-l">নাম</span>${o.name||'—'}</div>
+      <div class="o-field"><span class="o-field-l">ফোন</span>${o.phone||'—'}</div>
+      <div class="o-field"><span class="o-field-l">পেমেন্ট</span>${o.payMethod==='bkash'?'bKash':'Cash on Delivery'}</div>
+      ${o.txn&&o.txn!=='N/A'?`<div class="o-field"><span class="o-field-l">TXN ID</span>${o.txn}</div>`:''}
+    </div>
+    <div class="o-field" style="margin-bottom:8px"><span class="o-field-l">ঠিকানা</span>${o.address||'—'}</div>
+    <div class="o-items-txt">📦 ${(o.items||[]).map(i=>`${i.emoji||''} ${i.name} ×${i.qty}`).join(' · ')}</div>
+    <div class="o-actions">
+      ${['pending','confirmed','delivered','cancelled'].map(s=>`<button class="btn-st${(o.status||'pending')===s?' act':''}" onclick="updSt('${o._id}','${s}')">${stMap[s].t}</button>`).join('')}
+      <button class="btn-del-o" onclick="delOrd('${o._id}','${o.orderId||''}')">🗑️</button>
+    </div>`:''}
+  </div>`;
+}
+async function updSt(id,status){const{db,ref,update}=window._fb;try{await update(ref(db,'orders/'+id),{status});toast('✅ স্ট্যাটাস আপডেট!')}catch(e){toast('❌ সমস্যা!')}}
+async function delOrd(id,oid){confirm2('অর্ডার মুছুন','অর্ডার '+oid+' মুছে ফেলবেন?',async()=>{const{db,ref,remove}=window._fb;try{await remove(ref(db,'orders/'+id));toast('🗑️ অর্ডার মুছে ফেলা হয়েছে।')}catch(e){toast('❌ সমস্যা!')}})}
+
+/* Drag & Drop */
+const ua=document.getElementById('uploadArea');
+ua.addEventListener('dragover',e=>{e.preventDefault();ua.classList.add('drag')});
+ua.addEventListener('dragleave',()=>ua.classList.remove('drag'));
+ua.addEventListener('drop',e=>{e.preventDefault();ua.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){document.getElementById('imgFile').files=e.dataTransfer.files;handleImgSelect({files:e.dataTransfer.files})}});
+</script>
+</body>
+</html>
